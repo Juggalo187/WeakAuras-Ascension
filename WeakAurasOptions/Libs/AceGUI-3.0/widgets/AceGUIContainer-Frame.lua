@@ -181,16 +181,48 @@ local function Constructor()
 
 	frame:EnableMouse(true)
 	frame:SetMovable(true)
+	-- frame:SetResizable(true)
+	-- frame:SetFrameStrata("FULLSCREEN_DIALOG")
+	-- frame:SetFrameLevel(100) -- Lots of room to draw under it
+	-- frame:SetBackdrop(FrameBackdrop)
+	-- frame:SetBackdropColor(0, 0, 0, 1)
+	-- if frame.SetResizeBounds then -- WoW 10.0
+		-- frame:SetResizeBounds(400, 200)
+	-- else
+		-- frame:SetMinResize(400, 200)
+	-- end
+
 	frame:SetResizable(true)
 	frame:SetFrameStrata("FULLSCREEN_DIALOG")
 	frame:SetFrameLevel(100) -- Lots of room to draw under it
 	frame:SetBackdrop(FrameBackdrop)
 	frame:SetBackdropColor(0, 0, 0, 1)
-	if frame.SetResizeBounds then -- WoW 10.0
-		frame:SetResizeBounds(400, 200)
-	else
-		frame:SetMinResize(400, 200)
+
+	-- Add proper resize bounds with validation
+	local uiWidth, uiHeight = UIParent:GetSize()
+	if uiWidth and uiHeight and uiWidth > 0 and uiHeight > 0 then
+    local safeMinWidth, safeMinHeight = 400, 200
+    local safeMaxWidth = math.min(uiWidth - 50, 1600)
+    local safeMaxHeight = math.min(uiHeight - 50, 1200)
+    
+		if frame.SetResizeBounds then -- WoW 10.0+
+        frame:SetResizeBounds(safeMinWidth, safeMinHeight, safeMaxWidth, safeMaxHeight)
+		else
+        frame:SetMinResize(safeMinWidth, safeMinHeight)
+        frame:SetMaxResize(safeMaxWidth, safeMaxHeight)
+		end
+		else
+    -- Fallback to safe defaults
+    if frame.SetResizeBounds then
+        frame:SetResizeBounds(400, 200, 1600, 1200)
+		else
+			frame:SetMinResize(400, 200)
+			frame:SetMaxResize(1600, 1200)
+		end
 	end
+	
+	
+	
 	frame:SetToplevel(true)
 	frame:SetScript("OnShow", Frame_OnShow)
 	frame:SetScript("OnHide", Frame_OnClose)
